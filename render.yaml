@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: solana-devnet-wallet-watcher
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: WATCHED_WALLET
+        value: Auc3HdZdqUAVhuyLLGG6AJHsSeepgotTNTaoHD76e1oN
+      - key: SOLANA_CLUSTER
+        value: devnet
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: HELIUS_WEBHOOK_SECRET
+        sync: false
