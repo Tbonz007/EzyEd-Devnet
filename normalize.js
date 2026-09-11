@@ -1,19 +1,24 @@
-/**
- * Converts a Helius "enhanced transaction" webhook event into a common
- * activity shape the telegram.js sender understands:
- *
- * { chain, wallet, action, tokenSymbol, tokenAmount,
- *   counterAsset, counterAmount, priceUsd, txHash, explorerUrl }
- *
- * NOTE: exact payload fields depend on your Helius webhook config (type:
- * 'SWAP' vs 'Any'). Log req.body for a few real devnet transactions and
- * adjust field paths here if something doesn't map cleanly.
- */
-
 const CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
 
+function extractInvolvedAccounts(event) {
+  const accounts = new Set();
+  (event.tokenTransfers || []).forEach(t => {
+    if (t.fromUserAccount) accounts.add(t.fromUserAccount);
+    if (t.toUserAccount) accounts.add(t.toUserAccount);
+  });
+  (event.nativeTransfers || []).forEach(t => {
+    if (t.fromUserAccount) accounts.add(t.fromUserAccount);
+    if (t.toUserAccount) accounts.add(t.toUserAccount);
+  });
+  (event.accountData || []).forEach(a => {
+    if (a.account) accounts.add(a.account);
+  });
+  if (event.feePayer) accounts.add(event.feePayer);
+  return accounts;
+}
+
 function normalizeHeliusSwap(event, watchedWallet) {
-  const type = event.type; // e.g. 'SWAP', 'TRANSFER'
+  const type = event.type;
   const tokenTransfers = event.tokenTransfers || [];
 
   const incoming = tokenTransfers.find(t => t.toUserAccount === watchedWallet);
@@ -30,7 +35,7 @@ function normalizeHeliusSwap(event, watchedWallet) {
     tokenAmount: primary.tokenAmount || '0',
     counterAsset: null,
     counterAmount: null,
-    priceUsd: null, // devnet tokens have no real price; leave null
+    priceUsd: null,
     txHash: event.signature,
     explorerUrl: event.signature
       ? `https://solscan.io/tx/${event.signature}?cluster=${CLUSTER}`
@@ -38,4 +43,4 @@ function normalizeHeliusSwap(event, watchedWallet) {
   };
 }
 
-module.exports = { normalizeHeliusSwap };
+module.exports = { normalizeHeliusSwap, extractInvolvedAccounts };
