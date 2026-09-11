@@ -2,11 +2,11 @@
   "name": "telegram-wallet-bot",
   "version": "1.0.0",
   "description": "Multi-chain wallet activity monitor that posts buy/sell alerts to Telegram",
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "start": "node index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "express": "^4.19.2",
