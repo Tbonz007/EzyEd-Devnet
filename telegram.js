@@ -1,27 +1,21 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
 
-if (!token || !chatId) {
-  console.warn('[telegram] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing from .env');
+if (!token) {
+  console.warn('[telegram] TELEGRAM_BOT_TOKEN missing from env vars');
 }
 
-// polling:false because this bot only sends messages, it doesn't need to receive commands.
-const bot = new TelegramBot(token, { polling: false });
+const bot = new TelegramBot(token, { polling: true });
 
-/**
- * Sends a formatted wallet-activity alert to the configured chat.
- * @param {object} activity - normalized activity object (see normalize.js)
- */
-async function sendActivityAlert(activity) {
+async function sendActivityAlert(chatId, activity) {
   const {
     chain,
     wallet,
-    action, // 'buy' | 'sell' | 'transfer'
+    action,
     tokenSymbol,
     tokenAmount,
-    counterAsset, // e.g. USDC, SOL, ETH - what it was traded against
+    counterAsset,
     counterAmount,
     priceUsd,
     txHash,
@@ -51,7 +45,7 @@ async function sendActivityAlert(activity) {
   try {
     await bot.sendMessage(chatId, text, { parse_mode: 'HTML', disable_web_page_preview: true });
   } catch (err) {
-    console.error('[telegram] failed to send message:', err.message);
+    console.error(`[telegram] failed to send to ${chatId}:`, err.message);
   }
 }
 
